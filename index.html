@@ -1,349 +1,744 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VialGuard | Lab Logistics POC</title>
-  <meta name="description" content="VialGuard — Real-time cold-chain triage dashboard for lab technicians. Prevent biological sample loss with live risk alerts." />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VialGuard | Lab Logistics POC</title>
+    <meta name="description"
+        content="VialGuard — Real-time cold-chain triage dashboard for lab technicians. Prevent biological sample loss with live risk alerts." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
 
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
 
-    /* Critical pulse animation */
-    @keyframes pulse-red {
-      0%, 100% { background-color: rgba(239,68,68,0.12); }
-      50%       { background-color: rgba(239,68,68,0.25); }
-    }
-    .critical-row { animation: pulse-red 1.8s ease-in-out infinite; }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
 
-    /* Glow badge */
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 6px 1px rgba(239,68,68,0.6); }
-      50%       { box-shadow: 0 0 14px 4px rgba(239,68,68,0.9); }
-    }
-    .glow-badge { animation: glow 1.8s ease-in-out infinite; }
+        /* Critical pulse animation */
+        @keyframes pulse-red {
 
-    /* Modal fade-in */
-    @keyframes fadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
-    .modal-enter { animation: fadeIn 0.2s ease-out forwards; }
+            0%,
+            100% {
+                background-color: rgba(239, 68, 68, 0.12);
+            }
 
-    /* Smooth row removal */
-    .row-exit { transition: opacity 0.3s, transform 0.3s; opacity: 0; transform: translateX(30px); }
+            50% {
+                background-color: rgba(239, 68, 68, 0.25);
+            }
+        }
 
-    /* Scrollbar styling */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .critical-row {
+            animation: pulse-red 1.8s ease-in-out infinite;
+        }
 
-    /* Progress bar */
-    .progress-bar-bg { background: rgba(255,255,255,0.08); border-radius: 9999px; height:6px; width:100%; }
-    .progress-bar    { border-radius: 9999px; height:6px; transition: width 0.5s ease; }
+        /* Glow badge */
+        @keyframes glow {
 
-    /* Stat card hover */
-    .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-  </style>
+            0%,
+            100% {
+                box-shadow: 0 0 6px 1px rgba(239, 68, 68, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 14px 4px rgba(239, 68, 68, 0.9);
+            }
+        }
+
+        .glow-badge {
+            animation: glow 1.8s ease-in-out infinite;
+        }
+
+        /* Modal fade-in */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-enter {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        /* Login screen slide-up */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            animation: slideUp 0.35s cubic-bezier(.16, 1, .3, 1) forwards;
+        }
+
+        /* Audit panel slide-in from right */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .audit-open {
+            animation: slideInRight 0.28s cubic-bezier(.16, 1, .3, 1) forwards;
+        }
+
+        .audit-close {
+            animation: slideOutRight 0.22s ease-in forwards;
+        }
+
+        /* Smooth row removal */
+        .row-exit {
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        /* Progress bar */
+        .progress-bar-bg {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            height: 6px;
+            width: 100%;
+        }
+
+        .progress-bar {
+            border-radius: 9999px;
+            height: 6px;
+            transition: width 0.5s ease;
+        }
+
+        /* Stat card hover */
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+    </style>
 </head>
 
 <body class="bg-slate-950 text-slate-100 min-h-screen">
 
-  <!-- ── NAV ── -->
-  <nav class="bg-slate-900 border-b border-slate-800 shadow-xl sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">🧬</span>
-        <h1 class="text-xl font-extrabold tracking-tight">
-          VIAL<span class="text-blue-400">GUARD</span>
-        </h1>
-        <span class="text-xs font-semibold bg-blue-900/60 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full uppercase tracking-widest ml-2">POC</span>
-      </div>
-      <div class="flex items-center gap-4 text-sm text-slate-400">
-        <span id="clock" class="mono text-slate-300 text-xs"></span>
-        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow shadow-emerald-400/60 animate-pulse"></span>
-        <span class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Live</span>
-      </div>
-    </div>
-  </nav>
-
-  <!-- ── HEADER ── -->
-  <div class="max-w-7xl mx-auto px-6 pt-8 pb-2">
-    <p class="text-slate-400 text-sm">Cold-Chain Triage Dashboard &mdash; Incoming Shipment Risk Engine</p>
-    <h2 class="text-2xl font-bold text-white mt-0.5">Active Sample Queue</h2>
-  </div>
-
-  <!-- ── STATS CARDS ── -->
-  <div class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 sm:grid-cols-3 gap-5">
-
-    <!-- Active Shipments -->
-    <div class="stat-card bg-slate-900 border border-slate-700/60 rounded-2xl p-5">
-      <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Active Shipments</p>
-      <p id="total-count" class="text-4xl font-extrabold text-white">0</p>
-      <p class="text-xs text-slate-500 mt-1">in triage queue</p>
-    </div>
-
-    <!-- Critical Risk -->
-    <div class="stat-card bg-slate-900 border border-red-500/30 rounded-2xl p-5">
-      <p class="text-xs font-semibold text-red-400 uppercase tracking-widest mb-1">Critical Risk</p>
-      <p id="risk-count" class="text-4xl font-extrabold text-red-400">0</p>
-      <p class="text-xs text-slate-500 mt-1">&lt; 1 hour remaining</p>
-    </div>
-
-    <!-- Actions -->
-    <div class="stat-card bg-slate-900 border border-slate-700/60 rounded-2xl p-5 flex flex-col justify-between">
-      <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Demo Controls</p>
-      <div class="flex flex-col gap-2">
-        <button id="add-btn" onclick="openModal()"
-          class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 shadow shadow-blue-500/30">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-          </svg>
-          ADD NEW SHIPMENT
-        </button>
-        <button onclick="resetDemo()"
-          class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-4 py-2 rounded-lg transition-all border border-slate-600/50">
-          ↺ Reset Demo Data
-        </button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ── TRIAGE TABLE ── -->
-  <div class="max-w-7xl mx-auto px-6 pb-16">
-    <div class="bg-slate-900 border border-slate-700/60 rounded-2xl overflow-hidden shadow-2xl">
-
-      <!-- Table header bar -->
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-        <h3 class="font-bold text-slate-200 uppercase tracking-wider text-sm flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-          </svg>
-          Incoming Triage Queue
-        </h3>
-        <span class="text-xs text-slate-500 italic">Live countdown · Auto-refresh every 30s</span>
-      </div>
-
-      <!-- Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead>
-            <tr class="text-xs text-slate-500 uppercase tracking-wider border-b border-slate-800">
-              <th class="px-6 py-3">Item ID</th>
-              <th class="px-6 py-3">Sample Type</th>
-              <th class="px-6 py-3">Received</th>
-              <th class="px-6 py-3">Stability Limit</th>
-              <th class="px-6 py-3">Time Remaining</th>
-              <th class="px-6 py-3">Risk</th>
-              <th class="px-6 py-3 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody id="shipment-table">
-          </tbody>
-        </table>
-        <!-- Empty state -->
-        <div id="empty-state" class="hidden py-20 text-center">
-          <div class="text-5xl mb-4">✅</div>
-          <p class="text-slate-400 font-semibold text-lg">Queue Clear</p>
-          <p class="text-slate-600 text-sm mt-1">All samples stored. Great work!</p>
-          <button onclick="resetDemo()" class="mt-5 text-blue-400 hover:text-blue-300 text-sm underline underline-offset-2">
-            Reset demo data
-          </button>
+    <!-- ── NAV ── -->
+    <nav class="bg-slate-900 border-b border-slate-800 shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🧬</span>
+                <h1 class="text-xl font-extrabold tracking-tight">
+                    VIAL<span class="text-blue-400">GUARD</span>
+                </h1>
+                <span
+                    class="text-xs font-semibold bg-blue-900/60 text-blue-300 border border-blue-500/40 px-2.5 py-0.5 rounded-full uppercase tracking-widest ml-2">POC</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-slate-400">
+                <span id="clock" class="mono text-slate-300 text-xs"></span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow shadow-emerald-400/60 animate-pulse"></span>
+                <span class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Live</span>
+                <!-- Technician chip -->
+                <div id="tech-chip"
+                    class="hidden items-center gap-2 bg-slate-800 border border-slate-600 rounded-full pl-1 pr-3 py-1">
+                    <span
+                        class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white"
+                        id="tech-avatar">?</span>
+                    <div class="flex flex-col leading-tight">
+                        <span id="tech-name-nav" class="text-white text-xs font-semibold"></span>
+                        <span id="tech-badge-nav" class="text-slate-400 text-[10px] mono"></span>
+                    </div>
+                </div>
+                <button id="audit-btn" onclick="toggleAudit()"
+                    class="hidden items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-1.5 rounded-lg transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Audit Log
+                    <span id="audit-count"
+                        class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+                <button id="switch-btn" onclick="switchTech()"
+                    class="hidden text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2">
+                    Switch
+                </button>
+            </div>
         </div>
-      </div>
+    </nav>
+
+    <!-- ── HEADER ── -->
+    <div class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+        <p class="text-slate-400 text-sm">Cold-Chain Triage Dashboard &mdash; Incoming Shipment Risk Engine</p>
+        <h2 class="text-2xl font-bold text-white mt-0.5">Active Sample Queue</h2>
     </div>
 
-    <!-- Legend -->
-    <div class="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
-      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 shadow shadow-red-500/60 animate-pulse"></span> Critical: &lt;1 hr</span>
-      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-yellow-400"></span> Warning: 1–3 hrs</span>
-      <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Stable: &gt;3 hrs</span>
-    </div>
-  </div>
+    <!-- ── STATS CARDS ── -->
+    <div class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 sm:grid-cols-3 gap-5">
 
-  <!-- ── ADD SHIPMENT MODAL ── -->
-  <div id="modal-overlay"
-    class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
-    onclick="handleOverlayClick(event)">
-    <div id="modal-box" class="modal-enter bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-8">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          <span class="text-blue-400">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-          </span>
-          Add New Shipment
-        </h3>
-        <button onclick="closeModal()" class="text-slate-500 hover:text-white transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <form id="add-form" onsubmit="addShipment(event)" class="flex flex-col gap-5">
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Item ID</label>
-          <input id="f-id" type="text" placeholder="e.g. VG-999" required
-            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mono" />
+        <!-- Active Shipments -->
+        <div class="stat-card bg-slate-900 border border-slate-700/60 rounded-2xl p-5">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Active Shipments</p>
+            <p id="total-count" class="text-4xl font-extrabold text-white">0</p>
+            <p class="text-xs text-slate-500 mt-1">in triage queue</p>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Sample Type / Name</label>
-          <input id="f-name" type="text" placeholder="e.g. mRNA Batch C" required
-            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <!-- Critical Risk -->
+        <div class="stat-card bg-slate-900 border border-red-500/30 rounded-2xl p-5">
+            <p class="text-xs font-semibold text-red-400 uppercase tracking-widest mb-1">Critical Risk</p>
+            <p id="risk-count" class="text-4xl font-extrabold text-red-400">0</p>
+            <p class="text-xs text-slate-500 mt-1">&lt; 1 hour remaining</p>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Stability Limit (hours)</label>
-          <input id="f-limit" type="number" min="0.5" max="168" step="0.5" placeholder="e.g. 4" required
-            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mono" />
-          <p class="text-xs text-slate-600 mt-1">How many hours before this sample degrades?</p>
+        <!-- Actions -->
+        <div class="stat-card bg-slate-900 border border-slate-700/60 rounded-2xl p-5 flex flex-col justify-between">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Demo Controls</p>
+            <div class="flex flex-col gap-2">
+                <button id="add-btn" onclick="openModal()"
+                    class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 shadow shadow-blue-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    ADD NEW SHIPMENT
+                </button>
+                <button onclick="resetDemo()"
+                    class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-4 py-2 rounded-lg transition-all border border-slate-600/50">
+                    ↺ Reset Demo Data
+                </button>
+            </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Received At</label>
-          <input id="f-received" type="datetime-local" required
-            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mono" />
-          <p class="text-xs text-slate-600 mt-1">Leave as now for a fresh arrival.</p>
-        </div>
-
-        <div id="form-error" class="hidden text-red-400 text-xs bg-red-900/20 border border-red-500/30 rounded-lg px-4 py-2"></div>
-
-        <div class="flex gap-3 pt-2">
-          <button type="button" onclick="closeModal()"
-            class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold px-4 py-2.5 rounded-lg transition-all border border-slate-600/50">
-            Cancel
-          </button>
-          <button type="submit"
-            class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition-all shadow shadow-blue-500/30">
-            Add to Queue
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- ── TOAST ── -->
-  <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-800 border border-slate-600 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all">
-    <span id="toast-icon">✅</span>
-    <span id="toast-msg"></span>
-  </div>
+    <!-- ── TRIAGE TABLE ── -->
+    <div class="max-w-7xl mx-auto px-6 pb-16">
+        <div class="bg-slate-900 border border-slate-700/60 rounded-2xl overflow-hidden shadow-2xl">
 
-  <!-- ── SCRIPT ── -->
-  <script>
-    // ── Initial demo data (relative to "now" so it's always relevant) ──
-    function buildInitialData() {
-      const now = Date.now();
-      return [
-        { id: "VG-202", name: "mRNA COVID Vaccine",  received: new Date(now - 3.5 * 3600000).toISOString(), limit: 4  },
-        { id: "VG-505", name: "Stem Cell Batch B",   received: new Date(now - 1.2 * 3600000).toISOString(), limit: 2  },
-        { id: "VG-881", name: "Taq Polymerase",      received: new Date(now - 2   * 3600000).toISOString(), limit: 24 },
-        { id: "VG-102", name: "Generic Buffer Sol.", received: new Date(now             ).toISOString(), limit: 48 },
-      ];
-    }
+            <!-- Table header bar -->
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <h3 class="font-bold text-slate-200 uppercase tracking-wider text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Incoming Triage Queue
+                </h3>
+                <span class="text-xs text-slate-500 italic">Live countdown · Auto-refresh every 30s</span>
+            </div>
 
-    // ── Storage helpers ──
-    const STORAGE_KEY = 'vialguard_v2';
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs text-slate-500 uppercase tracking-wider border-b border-slate-800">
+                            <th class="px-6 py-3">Item ID</th>
+                            <th class="px-6 py-3">Sample Type</th>
+                            <th class="px-6 py-3">Received</th>
+                            <th class="px-6 py-3">Stability Limit</th>
+                            <th class="px-6 py-3">Time Remaining</th>
+                            <th class="px-6 py-3">Risk</th>
+                            <th class="px-6 py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shipment-table">
+                    </tbody>
+                </table>
+                <!-- Empty state -->
+                <div id="empty-state" class="hidden py-20 text-center">
+                    <div class="text-5xl mb-4">✅</div>
+                    <p class="text-slate-400 font-semibold text-lg">Queue Clear</p>
+                    <p class="text-slate-600 text-sm mt-1">All samples stored. Great work!</p>
+                    <button onclick="resetDemo()"
+                        class="mt-5 text-blue-400 hover:text-blue-300 text-sm underline underline-offset-2">
+                        Reset demo data
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    function getShipments() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : buildInitialData();
-      } catch { return buildInitialData(); }
-    }
+        <!-- Legend -->
+        <div class="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
+            <span class="flex items-center gap-1.5"><span
+                    class="w-3 h-3 rounded-full bg-red-500 shadow shadow-red-500/60 animate-pulse"></span> Critical:
+                &lt;1 hr</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-yellow-400"></span> Warning:
+                1–3 hrs</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Stable:
+                &gt;3 hrs</span>
+        </div>
+    </div>
 
-    function saveShipments(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
+    <!-- ── ADD SHIPMENT MODAL ── -->
+    <div id="modal-overlay"
+        class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
+        onclick="handleOverlayClick(event)">
+        <div id="modal-box"
+            class="modal-enter bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span class="text-blue-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </span>
+                    Add New Shipment
+                </h3>
+                <button onclick="closeModal()" class="text-slate-500 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
-    // ── Risk helpers ──
-    function getRisk(item) {
-      const elapsed  = (Date.now() - new Date(item.received)) / 3600000;
-      const remaining = item.limit - elapsed;
-      if (remaining < 1) return { level: 'critical', remaining };
-      if (remaining < 3) return { level: 'warning',  remaining };
-      return               { level: 'stable',   remaining };
-    }
+            <form id="add-form" onsubmit="addShipment(event)" class="flex flex-col gap-5">
 
-    function riskBadgeHtml(level) {
-      if (level === 'critical') return `<span class="glow-badge inline-flex items-center gap-1 bg-red-900/60 text-red-300 text-xs font-bold px-2.5 py-1 rounded-full border border-red-500/50">🔴 CRITICAL</span>`;
-      if (level === 'warning')  return `<span class="inline-flex items-center gap-1 bg-yellow-900/40 text-yellow-300 text-xs font-bold px-2.5 py-1 rounded-full border border-yellow-500/40">🟡 WARNING</span>`;
-      return                           `<span class="inline-flex items-center gap-1 bg-emerald-900/30 text-emerald-300 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-500/30">🟢 STABLE</span>`;
-    }
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Item
+                        ID</label>
+                    <input id="f-id" type="text" placeholder="e.g. VG-999" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mono" />
+                </div>
 
-    function progressBarHtml(item) {
-      const elapsed   = (Date.now() - new Date(item.received)) / 3600000;
-      const pct       = Math.min(100, (elapsed / item.limit) * 100);
-      const color     = pct >= 75 ? 'bg-red-500' : pct >= 50 ? 'bg-yellow-400' : 'bg-emerald-400';
-      return `<div class="progress-bar-bg mt-1.5"><div class="progress-bar ${color}" style="width:${pct.toFixed(1)}%"></div></div>`;
-    }
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Sample
+                        Type / Name</label>
+                    <input id="f-name" type="text" placeholder="e.g. mRNA Batch C" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
 
-    function formatRemaining(hrs) {
-      if (hrs <= 0) return '<span class="text-red-400 font-bold">EXPIRED</span>';
-      const h = Math.floor(hrs);
-      const m = Math.floor((hrs - h) * 60);
-      const s = Math.floor(((hrs - h) * 3600) % 60);
-      if (h > 0) return `<span>${h}h ${m}m</span>`;
-      return `<span>${m}m ${s}s</span>`;
-    }
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Stability
+                        Limit (hours)</label>
+                    <input id="f-limit" type="number" min="0.5" max="168" step="0.5" placeholder="e.g. 4" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mono" />
+                    <p class="text-xs text-slate-600 mt-1">How many hours before this sample degrades?</p>
+                </div>
 
-    // ── Render ──
-    function render() {
-      const shipments = getShipments();
-      const table     = document.getElementById('shipment-table');
-      const emptyState = document.getElementById('empty-state');
-      const totalEl   = document.getElementById('total-count');
-      const riskEl    = document.getElementById('risk-count');
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Received
+                        At</label>
+                    <input id="f-received" type="datetime-local" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mono" />
+                    <p class="text-xs text-slate-600 mt-1">Leave as now for a fresh arrival.</p>
+                </div>
 
-      totalEl.textContent = shipments.length;
+                <div id="form-error"
+                    class="hidden text-red-400 text-xs bg-red-900/20 border border-red-500/30 rounded-lg px-4 py-2">
+                </div>
 
-      if (shipments.length === 0) {
-        table.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        riskEl.textContent = 0;
-        return;
-      }
-      emptyState.classList.add('hidden');
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold px-4 py-2.5 rounded-lg transition-all border border-slate-600/50">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition-all shadow shadow-blue-500/30">
+                        Add to Queue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-      let riskCount = 0;
-      let html = '';
+    <!-- ── TOAST ── -->
+    <div id="toast"
+        class="hidden fixed bottom-6 right-6 z-50 bg-slate-800 border border-slate-600 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all">
+        <span id="toast-icon">✅</span>
+        <span id="toast-msg"></span>
+    </div>
 
-      // Sort: critical first, then warning, then stable
-      const sorted = [...shipments.entries()].sort(([, a], [, b]) => {
-        const ra = getRisk(a), rb = getRisk(b);
-        const order = { critical: 0, warning: 1, stable: 2 };
-        return order[ra.level] - order[rb.level];
-      });
+    <!-- ── LOGIN SCREEN ── -->
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center px-4">
+        <!-- Background grid decoration -->
+        <div class="absolute inset-0 opacity-5"
+            style="background-image:linear-gradient(rgba(99,102,241,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.5) 1px,transparent 1px);background-size:40px 40px">
+        </div>
+        <div class="login-card relative z-10 w-full max-w-sm">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-3">🧬</div>
+                <h1 class="text-3xl font-extrabold tracking-tight">VIAL<span class="text-blue-400">GUARD</span></h1>
+                <p class="text-slate-400 text-sm mt-2">Cold-Chain Triage System · Lab Check-In</p>
+            </div>
 
-      sorted.forEach(([origIndex, item]) => {
-        const { level, remaining } = getRisk(item);
-        if (level === 'critical') riskCount++;
+            <!-- Card -->
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-8 shadow-2xl">
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Technician Sign-In
+                </h2>
 
-        const rowBase = level === 'critical' ? 'critical-row' : level === 'warning' ? 'bg-yellow-400/5' : '';
-        const borderColor = level === 'critical' ? 'border-red-500/20' : level === 'warning' ? 'border-yellow-400/20' : 'border-slate-800';
+                <form id="login-form" onsubmit="handleLogin(event)" class="flex flex-col gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Full
+                            Name</label>
+                        <input id="login-name" type="text" placeholder="e.g. Dr. Sarah Chen" required autofocus
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Badge
+                            ID</label>
+                        <input id="login-badge" type="text" placeholder="e.g. #4821" required
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mono" />
+                    </div>
+                    <div id="login-error"
+                        class="hidden text-red-400 text-xs bg-red-900/20 border border-red-500/30 rounded-lg px-4 py-2">
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow shadow-blue-500/30 transition-all text-sm mt-1 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14" />
+                        </svg>
+                        Enter Dashboard
+                    </button>
+                </form>
+            </div>
+            <p class="text-center text-slate-600 text-xs mt-5">All actions are logged with your technician ID · POC Mode
+            </p>
+        </div>
+    </div>
 
-        html += `
+    <!-- ── AUDIT TRAIL PANEL ── -->
+    <div id="audit-panel"
+        class="hidden fixed top-0 right-0 h-full w-96 bg-slate-900 border-l border-slate-700 z-[60] flex flex-col shadow-2xl">
+        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+            <h3 class="font-bold text-white flex items-center gap-2 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Audit Trail
+            </h3>
+            <button onclick="toggleAudit()" class="text-slate-500 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="p-4 border-b border-slate-800 bg-slate-800/40">
+            <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold">Session</p>
+            <p id="audit-tech-name" class="text-white text-sm font-semibold mt-0.5"></p>
+            <p id="audit-tech-badge" class="text-slate-400 text-xs mono"></p>
+        </div>
+        <div id="audit-list" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            <p class="text-slate-600 text-xs text-center mt-8">No actions yet this session.</p>
+        </div>
+        <div class="p-4 border-t border-slate-800">
+            <button onclick="clearAuditLog()"
+                class="w-full text-xs text-slate-500 hover:text-red-400 transition-colors py-2 border border-slate-700 rounded-lg hover:border-red-500/30">
+                Clear Log
+            </button>
+        </div>
+    </div>
+    <!-- Audit backdrop -->
+    <div id="audit-backdrop" class="hidden fixed inset-0 z-[55] bg-black/40" onclick="toggleAudit()"></div>
+
+    <!-- ── SCRIPT ── -->
+    <script>
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  TECHNICIAN SESSION                                  ║
+        // ╚══════════════════════════════════════════════════════╝
+        let currentTech = null; // { name, badge, initials }
+        let auditLog = [];   // [ { time, action, item, tech } ]
+        let auditOpen = false;
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('login-name').value.trim();
+            const badge = document.getElementById('login-badge').value.trim();
+            const errEl = document.getElementById('login-error');
+
+            if (!name || !badge) {
+                errEl.textContent = 'Please enter your name and badge ID.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            // Compute initials (up to 2 chars)
+            const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+            currentTech = { name, badge, initials };
+
+            // Hide login screen
+            const screen = document.getElementById('login-screen');
+            screen.style.transition = 'opacity 0.4s';
+            screen.style.opacity = '0';
+            setTimeout(() => screen.classList.add('hidden'), 400);
+
+            // Show tech chip + audit button
+            document.getElementById('tech-chip').classList.remove('hidden');
+            document.getElementById('tech-chip').classList.add('flex');
+            document.getElementById('audit-btn').classList.remove('hidden');
+            document.getElementById('audit-btn').classList.add('flex');
+            document.getElementById('switch-btn').classList.remove('hidden');
+            document.getElementById('switch-btn').classList.add('inline');
+
+            // Populate chip
+            document.getElementById('tech-avatar').textContent = initials;
+            document.getElementById('tech-name-nav').textContent = name;
+            document.getElementById('tech-badge-nav').textContent = badge;
+
+            // Populate audit panel header
+            document.getElementById('audit-tech-name').textContent = name;
+            document.getElementById('audit-tech-badge').textContent = badge;
+
+            // Log the login event
+            addAuditEntry('🔑', 'Signed in to session', null);
+
+            showToast('👋', `Welcome, ${name}!`);
+        }
+
+        function switchTech() {
+            // Clear session, re-show login
+            currentTech = null;
+            auditLog = [];
+            auditOpen = false;
+            document.getElementById('audit-panel').classList.add('hidden');
+            document.getElementById('audit-backdrop').classList.add('hidden');
+            document.getElementById('tech-chip').classList.add('hidden');
+            document.getElementById('tech-chip').classList.remove('flex');
+            document.getElementById('audit-btn').classList.add('hidden');
+            document.getElementById('audit-btn').classList.remove('flex');
+            document.getElementById('switch-btn').classList.add('hidden');
+            document.getElementById('switch-btn').classList.remove('inline');
+            document.getElementById('audit-list').innerHTML = '<p class="text-slate-600 text-xs text-center mt-8">No actions yet this session.</p>';
+            document.getElementById('audit-count').textContent = '0';
+            document.getElementById('login-name').value = '';
+            document.getElementById('login-badge').value = '';
+            document.getElementById('login-error').classList.add('hidden');
+            const screen = document.getElementById('login-screen');
+            screen.style.opacity = '0';
+            screen.classList.remove('hidden');
+            requestAnimationFrame(() => { screen.style.transition = 'opacity 0.3s'; screen.style.opacity = '1'; });
+        }
+
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  AUDIT LOG                                           ║
+        // ╚══════════════════════════════════════════════════════╝
+        function addAuditEntry(icon, action, itemLabel) {
+            const entry = {
+                icon,
+                action,
+                item: itemLabel,
+                tech: currentTech ? currentTech.name : 'Unknown',
+                badge: currentTech ? currentTech.badge : '—',
+                time: new Date()
+            };
+            auditLog.unshift(entry); // newest first
+            renderAuditList();
+            // Update badge count
+            document.getElementById('audit-count').textContent = auditLog.length;
+        }
+
+        function renderAuditList() {
+            const list = document.getElementById('audit-list');
+            if (auditLog.length === 0) {
+                list.innerHTML = '<p class="text-slate-600 text-xs text-center mt-8">No actions yet this session.</p>';
+                return;
+            }
+            list.innerHTML = auditLog.map(e => `
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3">
+          <div class="flex items-start gap-2">
+            <span class="text-base leading-none mt-0.5">${e.icon}</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-slate-100 text-xs font-semibold">${e.action}</p>
+              ${e.item ? `<p class="text-blue-400 text-xs mono truncate mt-0.5">${e.item}</p>` : ''}
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-5 h-5 rounded-full bg-blue-700 flex items-center justify-center text-[9px] font-bold text-white shrink-0">${(currentTech?.initials || e.tech[0] || '?')}</span>
+                <span class="text-slate-400 text-[11px]">${e.tech}</span>
+                <span class="text-slate-600 text-[11px] mono">${e.badge}</span>
+              </div>
+            </div>
+            <span class="text-slate-500 text-[10px] mono shrink-0">${e.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function toggleAudit() {
+            const panel = document.getElementById('audit-panel');
+            const backdrop = document.getElementById('audit-backdrop');
+            if (!auditOpen) {
+                panel.classList.remove('hidden');
+                backdrop.classList.remove('hidden');
+                panel.classList.remove('audit-close');
+                panel.classList.add('audit-open');
+                auditOpen = true;
+            } else {
+                panel.classList.remove('audit-open');
+                panel.classList.add('audit-close');
+                backdrop.classList.add('hidden');
+                setTimeout(() => panel.classList.add('hidden'), 220);
+                auditOpen = false;
+            }
+        }
+
+        function clearAuditLog() {
+            auditLog = [];
+            renderAuditList();
+            document.getElementById('audit-count').textContent = '0';
+        }
+
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  INITIAL DEMO DATA                                   ║
+        // ╚══════════════════════════════════════════════════════╝
+        function buildInitialData() {
+            const now = Date.now();
+            return [
+                { id: "VG-202", name: "mRNA COVID Vaccine", received: new Date(now - 3.5 * 3600000).toISOString(), limit: 4 },
+                { id: "VG-505", name: "Stem Cell Batch B", received: new Date(now - 1.2 * 3600000).toISOString(), limit: 2 },
+                { id: "VG-881", name: "Taq Polymerase", received: new Date(now - 2 * 3600000).toISOString(), limit: 24 },
+                { id: "VG-102", name: "Generic Buffer Sol.", received: new Date(now).toISOString(), limit: 48 },
+            ];
+        }
+
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  STORAGE                                             ║
+        // ╚══════════════════════════════════════════════════════╝
+        const STORAGE_KEY = 'vialguard_v2';
+
+        function getShipments() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                return stored ? JSON.parse(stored) : buildInitialData();
+            } catch { return buildInitialData(); }
+        }
+
+        function saveShipments(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  RISK ENGINE                                         ║
+        // ╚══════════════════════════════════════════════════════╝
+        function getRisk(item) {
+            const elapsed = (Date.now() - new Date(item.received)) / 3600000;
+            const remaining = item.limit - elapsed;
+            if (remaining < 1) return { level: 'critical', remaining };
+            if (remaining < 3) return { level: 'warning', remaining };
+            return { level: 'stable', remaining };
+        }
+
+        function riskBadgeHtml(level) {
+            if (level === 'critical') return `<span class="glow-badge inline-flex items-center gap-1 bg-red-900/60 text-red-300 text-xs font-bold px-2.5 py-1 rounded-full border border-red-500/50">🔴 CRITICAL</span>`;
+            if (level === 'warning') return `<span class="inline-flex items-center gap-1 bg-yellow-900/40 text-yellow-300 text-xs font-bold px-2.5 py-1 rounded-full border border-yellow-500/40">🟡 WARNING</span>`;
+            return `<span class="inline-flex items-center gap-1 bg-emerald-900/30 text-emerald-300 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-500/30">🟢 STABLE</span>`;
+        }
+
+        function progressBarHtml(item) {
+            const elapsed = (Date.now() - new Date(item.received)) / 3600000;
+            const pct = Math.min(100, (elapsed / item.limit) * 100);
+            const color = pct >= 75 ? 'bg-red-500' : pct >= 50 ? 'bg-yellow-400' : 'bg-emerald-400';
+            return `<div class="progress-bar-bg mt-1.5"><div class="progress-bar ${color}" style="width:${pct.toFixed(1)}%"></div></div>`;
+        }
+
+        function formatRemaining(hrs) {
+            if (hrs <= 0) return '<span class="text-red-400 font-bold">EXPIRED</span>';
+            const h = Math.floor(hrs);
+            const m = Math.floor((hrs - h) * 60);
+            const s = Math.floor(((hrs - h) * 3600) % 60);
+            if (h > 0) return `<span>${h}h ${m}m</span>`;
+            return `<span>${m}m ${s}s</span>`;
+        }
+
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  RENDER                                              ║
+        // ╚══════════════════════════════════════════════════════╝
+        function render() {
+            const shipments = getShipments();
+            const table = document.getElementById('shipment-table');
+            const emptyState = document.getElementById('empty-state');
+            const totalEl = document.getElementById('total-count');
+            const riskEl = document.getElementById('risk-count');
+
+            totalEl.textContent = shipments.length;
+
+            if (shipments.length === 0) {
+                table.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                riskEl.textContent = 0;
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            let riskCount = 0;
+            let html = '';
+
+            const sorted = [...shipments.entries()].sort(([, a], [, b]) => {
+                const order = { critical: 0, warning: 1, stable: 2 };
+                return order[getRisk(a).level] - order[getRisk(b).level];
+            });
+
+            sorted.forEach(([origIndex, item]) => {
+                const { level, remaining } = getRisk(item);
+                if (level === 'critical') riskCount++;
+
+                const rowBase = level === 'critical' ? 'critical-row' : level === 'warning' ? 'bg-yellow-400/5' : '';
+                const borderColor = level === 'critical' ? 'border-red-500/20' : level === 'warning' ? 'border-yellow-400/20' : 'border-slate-800';
+
+                html += `
           <tr id="row-${origIndex}" class="border-b ${borderColor} ${rowBase} transition-all">
             <td class="px-6 py-4 mono text-sm text-blue-300 font-semibold">${item.id}</td>
-            <td class="px-6 py-4">
-              <span class="font-semibold text-slate-100">${item.name}</span>
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 mono">
-              ${new Date(item.received).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400">
-              ${item.limit}h
-              ${progressBarHtml(item)}
-            </td>
-            <td class="px-6 py-4 text-sm font-bold ${level === 'critical' ? 'text-red-400' : level === 'warning' ? 'text-yellow-300' : 'text-emerald-400'}">
-              ${formatRemaining(remaining)}
-            </td>
+            <td class="px-6 py-4"><span class="font-semibold text-slate-100">${item.name}</span></td>
+            <td class="px-6 py-4 text-sm text-slate-400 mono">${new Date(item.received).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+            <td class="px-6 py-4 text-sm text-slate-400">${item.limit}h ${progressBarHtml(item)}</td>
+            <td class="px-6 py-4 text-sm font-bold ${level === 'critical' ? 'text-red-400' : level === 'warning' ? 'text-yellow-300' : 'text-emerald-400'}">${formatRemaining(remaining)}</td>
             <td class="px-6 py-4">${riskBadgeHtml(level)}</td>
             <td class="px-6 py-4 text-right">
               <button onclick="storeVial(${origIndex})"
@@ -355,109 +750,111 @@
               </button>
             </td>
           </tr>`;
-      });
+            });
 
-      table.innerHTML = html;
-      riskEl.textContent = riskCount;
-    }
+            table.innerHTML = html;
+            riskEl.textContent = riskCount;
+        }
 
-    // ── Actions ──
-    function storeVial(index) {
-      const shipments = getShipments();
-      const name = shipments[index]?.name || 'Item';
-      shipments.splice(index, 1);
-      saveShipments(shipments);
-      render();
-      showToast('✅', `${name} stored in freezer`);
-    }
+        // ╔══════════════════════════════════════════════════════╗
+        // ║  ACTIONS  (all now attributed to currentTech)        ║
+        // ╚══════════════════════════════════════════════════════╝
+        function storeVial(index) {
+            const shipments = getShipments();
+            const item = shipments[index];
+            if (!item) return;
+            const { level } = getRisk(item);
+            shipments.splice(index, 1);
+            saveShipments(shipments);
+            render();
+            addAuditEntry('🧊', `Stored in freezer — ${level.toUpperCase()}`, `${item.id} · ${item.name}`);
+            showToast('✅', `${item.name} stored in freezer`);
+        }
 
-    function resetDemo() {
-      saveShipments(buildInitialData());
-      render();
-      showToast('↺', 'Demo data restored');
-    }
+        function resetDemo() {
+            saveShipments(buildInitialData());
+            render();
+            addAuditEntry('↺', 'Demo data reset', null);
+            showToast('↺', 'Demo data restored');
+        }
 
-    // ── Modal ──
-    function openModal() {
-      const now = new Date();
-      const pad = n => String(n).padStart(2,'0');
-      const localNow = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-      document.getElementById('f-received').value = localNow;
-      document.getElementById('form-error').classList.add('hidden');
-      document.getElementById('add-form').reset();
-      document.getElementById('f-received').value = localNow;
-      document.getElementById('modal-overlay').classList.remove('hidden');
-    }
+        // ── Add Shipment Modal ──
+        function openModal() {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const localNow = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            document.getElementById('form-error').classList.add('hidden');
+            document.getElementById('add-form').reset();
+            document.getElementById('f-received').value = localNow;
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
 
-    function closeModal() {
-      document.getElementById('modal-overlay').classList.add('hidden');
-    }
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
 
-    function handleOverlayClick(e) {
-      if (e.target === document.getElementById('modal-overlay')) closeModal();
-    }
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('modal-overlay')) closeModal();
+        }
 
-    function addShipment(e) {
-      e.preventDefault();
-      const id       = document.getElementById('f-id').value.trim().toUpperCase();
-      const name     = document.getElementById('f-name').value.trim();
-      const limit    = parseFloat(document.getElementById('f-limit').value);
-      const received = document.getElementById('f-received').value;
-      const errEl    = document.getElementById('form-error');
+        function addShipment(e) {
+            e.preventDefault();
+            const id = document.getElementById('f-id').value.trim().toUpperCase();
+            const name = document.getElementById('f-name').value.trim();
+            const limit = parseFloat(document.getElementById('f-limit').value);
+            const received = document.getElementById('f-received').value;
+            const errEl = document.getElementById('form-error');
 
-      if (!id || !name || isNaN(limit) || !received) {
-        errEl.textContent = 'Please fill in all fields correctly.';
-        errEl.classList.remove('hidden');
-        return;
-      }
+            if (!id || !name || isNaN(limit) || !received) {
+                errEl.textContent = 'Please fill in all fields correctly.';
+                errEl.classList.remove('hidden');
+                return;
+            }
 
-      const shipments = getShipments();
-      if (shipments.some(s => s.id === id)) {
-        errEl.textContent = `Item ID "${id}" already exists in the queue.`;
-        errEl.classList.remove('hidden');
-        return;
-      }
+            const shipments = getShipments();
+            if (shipments.some(s => s.id === id)) {
+                errEl.textContent = `Item ID "${id}" already exists in the queue.`;
+                errEl.classList.remove('hidden');
+                return;
+            }
 
-      shipments.push({ id, name, received: new Date(received).toISOString(), limit });
-      saveShipments(shipments);
-      closeModal();
-      render();
-      showToast('📦', `${id} — ${name} added to queue`);
-    }
+            shipments.push({ id, name, received: new Date(received).toISOString(), limit });
+            saveShipments(shipments);
+            closeModal();
+            render();
+            addAuditEntry('📦', `Added new shipment to queue`, `${id} · ${name} (${limit}h stability)`);
+            showToast('📦', `${id} — ${name} added to queue`);
+        }
 
-    // Keyboard: close modal with Escape
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeModal();
-    });
+        // ── Keyboard shortcuts ──
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { closeModal(); if (auditOpen) toggleAudit(); }
+        });
 
-    // ── Toast notification ──
-    let toastTimer;
-    function showToast(icon, msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-icon').textContent = icon;
-      document.getElementById('toast-msg').textContent  = msg;
-      toast.classList.remove('hidden');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
-    }
+        // ── Toast ──
+        let toastTimer;
+        function showToast(icon, msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-icon').textContent = icon;
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
 
-    // ── Clock ──
-    function updateClock() {
-      document.getElementById('clock').textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    }
+        // ── Clock ──
+        function updateClock() {
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
 
-    // ── Init ──
-    // Set initial data in localStorage if not present
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      saveShipments(buildInitialData());
-    }
-
-    render();
-    updateClock();
-
-    // Live countdown every second
-    setInterval(() => { render(); updateClock(); }, 1000);
-    // Full re-render every 30s (already covered by 1s, but keep semantics)
-  </script>
+        // ── Init ──
+        if (!localStorage.getItem(STORAGE_KEY)) {
+            saveShipments(buildInitialData());
+        }
+        render();
+        updateClock();
+        setInterval(() => { render(); updateClock(); }, 1000);
+    </script>
 </body>
+
 </html>
