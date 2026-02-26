@@ -107,17 +107,6 @@ The app doesn't use a database or a server. All calculations happen in the brows
 
 ---
 
-## Demo Script (Talking Points)
-
-1. **Open the app** and sign in as yourself. Point out that every action is attributed to a real technician — this is the accountability layer.
-2. **Show the red rows** — explain that these samples have less than an hour before a $10,000+ loss. Without this system, a technician receiving 20 boxes at once has no way to prioritise.
-3. **Click "Store in Freezer"** on the most critical item. Watch the count drop instantly.
-4. **Click "Add New Shipment"** and add a fresh mRNA batch with a 2-hour stability window. It immediately appears in a Warning or Critical state depending on when you set the arrival time.
-5. **Open the Audit Log** — explain that in a full production version, this log would write to an FDA-compliant database, capturing freezer temperature and chain-of-custody at the moment of storage.
-6. **Reset the demo** between runs.
-
----
-
 ## Tech Stack
 
 | Component | Technology |
